@@ -59,6 +59,7 @@ hw/mcu/st/stm32l0xx_hal_driver            https://github.com/STMicroelectronics/
 hw/mcu/st/stm32l1xx_hal_driver            https://github.com/STMicroelectronics/stm32l1xx_hal_driver.git    44efc446fa69ed8344e7fd966e68ed11043b35d9  stm32l1
 hw/mcu/st/stm32l4xx_hal_driver            https://github.com/STMicroelectronics/stm32l4xx_hal_driver.git    aee3d5bf283ae5df87532b781bdd01b7caf256fc  stm32l4
 hw/mcu/st/stm32l5xx_hal_driver            https://github.com/STMicroelectronics/stm32l5xx_hal_driver.git    675c32a75df37f39d50d61f51cb0dcf53f07e1cb  stm32l5
+hw/mcu/st/stm32n6xx_hal_driver            https://github.com/STMicroelectronics/stm32n6xx-hal-driver.git    49f9989d10cf6817d4b07ac01848956b46bd0fd6  stm32n6
 hw/mcu/st/stm32u5xx_hal_driver            https://github.com/STMicroelectronics/stm32u5xx_hal_driver.git    4d93097a67928e9377e655ddd14622adc31b9770  stm32u5
 hw/mcu/st/stm32wbxx_hal_driver            https://github.com/STMicroelectronics/stm32wbxx_hal_driver.git    2c5f06638be516c1b772f768456ba637f077bac8  stm32wb
 hw/mcu/ti                                 https://github.com/hathach/ti_driver.git                          143ed6cc20a7615d042b03b21e070197d473e6e5  msp430 msp432e4 tm4c
@@ -66,7 +67,7 @@ hw/mcu/wch/ch32f20x                       https://github.com/openwch/ch32f20x.gi
 hw/mcu/wch/ch32v103                       https://github.com/openwch/ch32v103.git                           7578cae0b21f86dd053a1f781b2fc6ab99d0ec17  ch32v10x
 hw/mcu/wch/ch32v20x                       https://github.com/openwch/ch32v20x.git                           c4c38f507e258a4e69b059ccc2dc27dde33cea1b  ch32v20x
 hw/mcu/wch/ch32v307                       https://github.com/openwch/ch32v307.git                           184f21b852cb95eed58e86e901837bc9fff68775  ch32v307
-lib/CMSIS_5                               https://github.com/ARM-software/CMSIS_5.git                       2b7495b8535bdcb306dac29b9ded4cfb679d7e5c  imxrt kinetis_k32l2 kinetis_kl lpc51 lpc54 lpc55 mcx mm32 msp432e4 nrf saml2x lpc11 lpc13 lpc15 lpc17 lpc18 lpc40 lpc43 stm32c0 stm32f0 stm32f1 stm32f2 stm32f3 stm32f4 stm32f7 stm32g0 stm32g4 stm32h5 stm32h7 stm32h7rs stm32l0 stm32l1 stm32l4 stm32l5 stm32u5 stm32wb sam3x samd11 samd21 samd51 samd5x_e5x same5x same7x saml2x samg tm4c
+lib/CMSIS_5                               https://github.com/ARM-software/CMSIS_5.git                       2b7495b8535bdcb306dac29b9ded4cfb679d7e5c  imxrt kinetis_k32l2 kinetis_kl lpc51 lpc54 lpc55 mcx mm32 msp432e4 nrf saml2x lpc11 lpc13 lpc15 lpc17 lpc18 lpc40 lpc43 stm32c0 stm32f0 stm32f1 stm32f2 stm32f3 stm32f4 stm32f7 stm32g0 stm32g4 stm32h5 stm32h7 stm32h7rs stm32l0 stm32l1 stm32l4 stm32l5 stm32n6 stm32u5 stm32wb sam3x samd11 samd21 samd51 samd5x_e5x same5x same7x saml2x samg tm4c
 lib/CMSIS_6                               https://github.com/ARM-software/CMSIS_6.git                       b0bbb0423b278ca632cfe1474eb227961d835fd2  ra
 lib/FreeRTOS-Kernel                       https://github.com/FreeRTOS/FreeRTOS-Kernel.git                   cc0e0707c0c748713485b870bb980852b210877f  all
 lib/lwip                                  https://github.com/lwip-tcpip/lwip.git                            159e31b689577dbf69cf0683bbaffbd71fa5ee10  all

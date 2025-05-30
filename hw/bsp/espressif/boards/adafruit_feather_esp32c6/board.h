@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021, Ha Thach (tinyusb.org)
+ * Copyright (c) 2020, Ha Thach (tinyusb.org)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,45 +25,32 @@
  */
 
 /* metadata:
-   name: Freedom MCXA153
-   url: https://www.nxp.com/design/design-center/development-boards-and-designs/FRDM-MCXA153
+   name: Adafruit Feather EPS32-C6
+   url: https://www.adafruit.com/product/5933
 */
 
 #ifndef BOARD_H_
 #define BOARD_H_
 
 #ifdef __cplusplus
-extern "C" {
+ extern "C" {
 #endif
 
-// LED
-#define LED_GPIO              GPIO3
-#define LED_CLK               kCLOCK_GateGPIO3
-#define LED_PIN               12 //red
-#define LED_STATE_ON          0
+#define NEOPIXEL_PIN          15
 
-// ISP button
-#define BUTTON_GPIO           GPIO3
-#define BUTTON_CLK            kCLOCK_GateGPIO3
-#define BUTTON_PIN            29 //sw2
+#define BUTTON_PIN            9
 #define BUTTON_STATE_ACTIVE   0
 
-// UART
-#define UART_DEV              LPUART0
-
-static inline void board_uart_init_clock(void) {
-  /* attach 12 MHz clock to LPUART0 (debug console) */
-  CLOCK_SetClockDiv(kCLOCK_DivLPUART0, 1u);
-  CLOCK_AttachClk(kFRO12M_to_LPUART0);
-
-  RESET_PeripheralReset(kLPUART0_RST_SHIFT_RSTn);
-}
-
-// XTAL
-#define XTAL0_CLK_HZ          (24 * 1000 * 1000U)
+// SPI for USB host shield
+#define MAX3421_SPI_HOST SPI2_HOST
+#define MAX3421_SCK_PIN  21
+#define MAX3421_MOSI_PIN 22
+#define MAX3421_MISO_PIN 23
+#define MAX3421_CS_PIN   8
+#define MAX3421_INTR_PIN 7
 
 #ifdef __cplusplus
-}
+ }
 #endif
 
-#endif
+#endif /* BOARD_H_ */

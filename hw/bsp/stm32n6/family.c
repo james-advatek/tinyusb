@@ -183,14 +183,14 @@ void board_init(void) {
 
 
   __HAL_RCC_USB1_OTG_HS_CLK_ENABLE();
-  PCD_HandleTypeDef hpcd_USB1_OTG_HS;
+  HCD_HandleTypeDef hpcd_USB1_OTG_HS;
   /* USER CODE BEGIN USB1_OTG_HS_Init 1 */
-  memset(&hpcd_USB1_OTG_HS, 0x0, sizeof(PCD_HandleTypeDef));
+  memset(&hpcd_USB1_OTG_HS, 0x0, sizeof(HCD_HandleTypeDef));
 
   /* USER CODE END USB1_OTG_HS_Init 1 */
   hpcd_USB1_OTG_HS.Instance = USB1_OTG_HS;
   hpcd_USB1_OTG_HS.Init.dev_endpoints = 9;
-  hpcd_USB1_OTG_HS.Init.speed = PCD_SPEED_HIGH;
+  hpcd_USB1_OTG_HS.Init.speed = HCD_SPEED_HIGH;
   hpcd_USB1_OTG_HS.Init.dma_enable = DISABLE;
   hpcd_USB1_OTG_HS.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
   hpcd_USB1_OTG_HS.Init.Sof_enable = DISABLE;
@@ -199,7 +199,7 @@ void board_init(void) {
   hpcd_USB1_OTG_HS.Init.vbus_sensing_enable = DISABLE;
   hpcd_USB1_OTG_HS.Init.use_dedicated_ep1 = DISABLE;
   hpcd_USB1_OTG_HS.Init.use_external_vbus = DISABLE;
-  if (HAL_PCD_Init(&hpcd_USB1_OTG_HS) != HAL_OK)
+  if (HAL_HCD_Init(&hpcd_USB1_OTG_HS) != HAL_OK)
   {
     HardFault_Handler();
   }
@@ -336,6 +336,108 @@ static void RISAF_Config(void)
 
 }
 
+/**
+  * Initializes the Global MSP.
+  */
+void HAL_MspInit(void)
+{
+  /* USER CODE BEGIN MspInit 0 */
+
+  /* USER CODE END MspInit 0 */
+
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+
+  /* System interrupt init*/
+
+  /* USER CODE BEGIN MspInit 1 */
+
+  /* USER CODE END MspInit 1 */
+}
+
+/**
+* @brief UART MSP Initialization
+* This function configures the hardware resources used in this example
+* @param huart: UART handle pointer
+* @retval None
+*/
+void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+  if (huart->Instance == USART1)
+  {
+  /* USER CODE BEGIN USART1_MspInit 0 */
+
+  /* USER CODE END USART1_MspInit 0 */
+
+  /** Initializes the peripherals clock
+  */
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
+    PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    /* Peripheral clock enable */
+    __HAL_RCC_USART1_CLK_ENABLE();
+
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    /**USART1 GPIO Configuration
+    PE5     ------> USART1_TX
+    PE6     ------> USART1_RX
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_6;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+    /* USART1 interrupt Init */
+    HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
+  /* USER CODE BEGIN USART1_MspInit 1 */
+
+  /* USER CODE END USART1_MspInit 1 */
+  }
+}
+
+/**
+* @brief UART MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param huart: UART handle pointer
+* @retval None
+*/
+void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == USART1)
+  {
+  /* USER CODE BEGIN USART1_MspDeInit 0 */
+
+  /* USER CODE END USART1_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_USART1_CLK_DISABLE();
+
+    /**USART1 GPIO Configuration
+    PE5     ------> USART1_TX
+    PE6     ------> USART1_RX
+    */
+    HAL_GPIO_DeInit(GPIOE, GPIO_PIN_5 | GPIO_PIN_6);
+
+  /* USER CODE BEGIN USART1_MspDeInit 1 */
+
+  /* USER CODE END USART1_MspDeInit 1 */
+  }
+
+}
 
 /**
 * @brief PCD MSP Initialization
@@ -419,6 +521,168 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
     /* USER CODE END USB_OTG_HS_MspInit 1 */
   }
 }
+
+/**
+* @brief PCD MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hhcd: PCD handle pointer
+* @retval None
+*/
+void HAL_PCD_MspDeInit(PCD_HandleTypeDef* pcdHandle)
+{
+
+  if(pcdHandle->Instance==USB1_OTG_HS)
+  {
+    /* USER CODE BEGIN USB_OTG_HS_MspDeInit 0 */
+
+    /* USER CODE END USB_OTG_HS_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_USB1_OTG_HS_CLK_DISABLE();
+    __HAL_RCC_USB1_OTG_HS_PHY_CLK_DISABLE();
+
+    /* Disable VDDUSB */
+    if(__HAL_RCC_PWR_IS_CLK_ENABLED())
+    {
+      HAL_PWREx_DisableVddUSB();
+    }
+    else
+    {
+      __HAL_RCC_PWR_CLK_ENABLE();
+      HAL_PWREx_DisableVddUSB();
+      __HAL_RCC_PWR_CLK_DISABLE();
+    }
+    /* USB_OTG_HS interrupt DeInit */
+    HAL_NVIC_DisableIRQ(USB1_OTG_HS_IRQn);
+    /* USER CODE BEGIN USB_OTG_HS_MspDeInit 1 */
+
+    /* USER CODE END USB_OTG_HS_MspDeInit 1 */
+  }
+}
+
+/**
+* @brief HCD MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hhcd: HCD handle pointer
+* @retval None
+*/
+void HAL_HCD_MspInit(HCD_HandleTypeDef *hhcd)
+{
+  if (hhcd->Instance == USB1_OTG_HS)
+  {
+    /* USER CODE BEGIN USB_OTG_HS_MspInit 0 */
+
+    /* USER CODE END USB_OTG_HS_MspInit 0 */
+    /* Enable VDDUSB */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    HAL_PWREx_EnableVddUSBVMEN();
+    while(__HAL_PWR_GET_FLAG(PWR_FLAG_USB33RDY));
+    HAL_PWREx_EnableVddUSB();
+
+    /** Initializes the peripherals clock
+    */
+    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USBOTGHS1;
+    PeriphClkInitStruct.UsbOtgHs1ClockSelection = RCC_USBPHY1REFCLKSOURCE_HSE_DIRECT;
+
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+      /* Initialization Error */
+      Error_Handler();
+    }
+
+    /** Set USB OTG HS PHY1 Reference Clock Source */
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USBPHY1;
+    PeriphClkInitStruct.UsbPhy1ClockSelection = RCC_USBPHY1REFCLKSOURCE_HSE_DIRECT;
+
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+      /* Initialization Error */
+      Error_Handler();
+    }
+
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    LL_AHB5_GRP1_ForceReset(0x00800000);
+    __HAL_RCC_USB1_OTG_HS_FORCE_RESET();
+    __HAL_RCC_USB1_OTG_HS_PHY_FORCE_RESET();
+
+    LL_RCC_HSE_SelectHSEDiv2AsDiv2Clock();
+    LL_AHB5_GRP1_ReleaseReset(0x00800000);
+
+    /* Peripheral clock enable */
+    __HAL_RCC_USB1_OTG_HS_CLK_ENABLE();
+
+    /* Required few clock cycles before accessing USB PHY Controller Registers */
+    HAL_Delay(1);
+
+    USB1_HS_PHYC->USBPHYC_CR &= ~(0x7 << 0x4);
+
+    USB1_HS_PHYC->USBPHYC_CR |= (0x1 << 16) |
+                                (0x2 << 4)  |
+                                (0x1 << 2)  |
+                                 0x1U;
+
+    __HAL_RCC_USB1_OTG_HS_PHY_RELEASE_RESET();
+
+    /* Required few clock cycles before Releasing Reset */
+    HAL_Delay(1);
+
+    __HAL_RCC_USB1_OTG_HS_RELEASE_RESET();
+
+    /* Peripheral PHY clock enable */
+    __HAL_RCC_USB1_OTG_HS_PHY_CLK_ENABLE();
+
+    /* USB_OTG_HS interrupt Init */
+    HAL_NVIC_SetPriority(USB1_OTG_HS_IRQn, 7, 0);
+    HAL_NVIC_EnableIRQ(USB1_OTG_HS_IRQn);
+
+    /* USER CODE BEGIN USB_OTG_HS_MspInit 1 */
+
+    /* USER CODE END USB_OTG_HS_MspInit 1 */
+  }
+}
+
+/**
+* @brief HCD MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hhcd: HCD handle pointer
+* @retval None
+*/
+void HAL_HCD_MspDeInit(HCD_HandleTypeDef *hhcd)
+{
+  if (hhcd->Instance == USB1_OTG_HS)
+  {
+    /* USER CODE BEGIN USB_OTG_HS_MspDeInit 0 */
+
+    /* USER CODE END USB_OTG_HS_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_USB1_OTG_HS_CLK_DISABLE();
+    __HAL_RCC_USB1_OTG_HS_PHY_CLK_DISABLE();
+
+    /* Disable VDDUSB */
+    if(__HAL_RCC_PWR_IS_CLK_ENABLED())
+    {
+      HAL_PWREx_DisableVddUSB();
+    }
+    else
+    {
+      __HAL_RCC_PWR_CLK_ENABLE();
+      HAL_PWREx_DisableVddUSB();
+      __HAL_RCC_PWR_CLK_DISABLE();
+    }
+    /* USB_OTG_HS interrupt DeInit */
+    HAL_NVIC_DisableIRQ(USB1_OTG_HS_IRQn);
+  /* USER CODE BEGIN USB_OTG_HS_MspDeInit 1 */
+
+  /* USER CODE END USB_OTG_HS_MspDeInit 1 */
+  }
+}
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
+
+
+
 
 void HardFault_Handler(void) {
   __asm("BKPT #0\n");

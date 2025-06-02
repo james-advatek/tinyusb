@@ -77,6 +77,17 @@ extern "C" {
   #define EP_MAX_HS       9
   #define EP_FIFO_SIZE_HS 4096
 
+#elif CFG_TUSB_MCU == OPT_MCU_STM32N6
+  #include "stm32n6xx.h"
+  #define EP_MAX_FS       6
+  #define EP_FIFO_SIZE_FS 1280
+
+  #define EP_MAX_HS       9
+  #define EP_FIFO_SIZE_HS 4096
+
+  #define USB_OTG_HS_PERIPH_BASE    USB1_OTG_HS_BASE
+  #define OTG_HS_IRQn               USB1_OTG_HS_IRQn
+
 #elif CFG_TUSB_MCU == OPT_MCU_STM32F7
   #include "stm32f7xx.h"
   #define EP_MAX_FS       6
@@ -116,8 +127,8 @@ extern "C" {
 // On STM32 for consistency we associate
 // - Port0 to OTG_FS, and Port1 to OTG_HS
 static const dwc2_controller_t _dwc2_controller[] = {
-    #ifdef USB_OTG_FS_PERIPH_BASE
-    { .reg_base = USB_OTG_FS_PERIPH_BASE, .irqnum = OTG_FS_IRQn, .ep_count = EP_MAX_FS, .ep_fifo_size = EP_FIFO_SIZE_FS },
+    #ifdef USB_OTG_HS_PERIPH_BASE
+    { .reg_base = USB_OTG_HS_PERIPH_BASE, .irqnum = OTG_HS_IRQn, .ep_count = EP_MAX_HS, .ep_fifo_size = EP_FIFO_SIZE_HS },
     #endif
 
     #ifdef USB_OTG_HS_PERIPH_BASE

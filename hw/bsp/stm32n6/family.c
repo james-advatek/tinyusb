@@ -191,26 +191,6 @@ void board_init(void) {
 
   /* Peripheral PHY clock enable */
   __HAL_RCC_USB1_OTG_HS_PHY_CLK_ENABLE();
-  // HCD_HandleTypeDef hpcd_USB1_OTG_HS;
-  // /* USER CODE BEGIN USB1_OTG_HS_Init 1 */
-  // memset(&hpcd_USB1_OTG_HS, 0x0, sizeof(HCD_HandleTypeDef));
-
-  // /* USER CODE END USB1_OTG_HS_Init 1 */
-  // hpcd_USB1_OTG_HS.Instance = USB1_OTG_HS;
-  // hpcd_USB1_OTG_HS.Init.dev_endpoints = 9;
-  // hpcd_USB1_OTG_HS.Init.speed = HCD_SPEED_HIGH;
-  // hpcd_USB1_OTG_HS.Init.dma_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
-  // hpcd_USB1_OTG_HS.Init.Sof_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.low_power_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.lpm_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.vbus_sensing_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.use_dedicated_ep1 = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.use_external_vbus = DISABLE;
-  // if (HAL_HCD_Init(&hpcd_USB1_OTG_HS) != HAL_OK)
-  // {
-  //   HardFault_Handler();
-  // }
 
   board_init2();
 

@@ -31,7 +31,18 @@
    manufacturer: STMicroelectronics
 */
 
+// Suppress warning caused by mcu driver
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+#endif
+
 #include "stm32n6xx_hal.h"
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #include "bsp/board_api.h"
 
 TU_ATTR_UNUSED static void Error_Handler(void) { }
@@ -85,37 +96,6 @@ void USB1_OTG_HS_IRQHandler(void) {
   tusb_int_handler(1, true);
 }
 
-#ifdef TRACE_ETM
-// Not implemented in this port
-void trace_etm_init(void) {
-  return
-}
-#else
-  #define trace_etm_init()
-#endif
-
-#ifdef LOGGER_SWO
-void log_swo_init(void)
-{
-  //UNLOCK FUNNEL
-  *(volatile uint32_t*)(0x5C004FB0) = 0xC5ACCE55; // SWTF_LAR
-  *(volatile uint32_t*)(0x5C003FB0) = 0xC5ACCE55; // SWO_LAR
-
-  //SWO current output divisor register
-  //To change it, you can use the following rule
-  // value = (CPU_Freq / 3 / SWO_Freq) - 1
-  *(volatile uint32_t*)(0x5C003010) = ((SystemCoreClock / 3 / SWO_FREQ) - 1); // SWO_CODR
-
-  //SWO selected pin protocol register
-  *(volatile uint32_t*)(0x5C0030F0) = 0x00000002; // SWO_SPPR
-
-  //Enable ITM input of SWO trace funnel
-  *(volatile uint32_t*)(0x5C004000) |= 0x00000001; // SWFT_CTRL
-}
-#else
-  #define log_swo_init()
-#endif
-
 void board_init(void) {
 
   /* Enable BusFault and SecureFault handlers (HardFault is default) */
@@ -140,13 +120,13 @@ void board_init(void) {
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPION_CLK_ENABLE();
   __HAL_RCC_GPIOO_CLK_ENABLE();
   __HAL_RCC_GPIOP_CLK_ENABLE();
   __HAL_RCC_GPIOQ_CLK_ENABLE();
 
-  log_swo_init();
-  trace_etm_init();
+  // HAL_ICACHE_Enable();
 
   for (uint8_t i = 0; i < TU_ARRAY_SIZE(board_pindef); i++) {
     HAL_GPIO_Init(board_pindef[i].port, &board_pindef[i].pin_init);
@@ -177,7 +157,6 @@ void board_init(void) {
 
 
   __HAL_RCC_USB1_OTG_HS_CLK_ENABLE();
-
   __HAL_RCC_PWR_CLK_ENABLE();
   HAL_PWREx_EnableVddUSBVMEN();
   while(__HAL_PWR_GET_FLAG(PWR_FLAG_USB33RDY));
@@ -212,27 +191,6 @@ void board_init(void) {
 
   /* Peripheral PHY clock enable */
   __HAL_RCC_USB1_OTG_HS_PHY_CLK_ENABLE();
-
-  // PCD_HandleTypeDef hpcd_USB1_OTG_HS;
-  // /* USER CODE BEGIN USB1_OTG_HS_Init 1 */
-  // memset(&hpcd_USB1_OTG_HS, 0x0, sizeof(PCD_HandleTypeDef));
-
-  // /* USER CODE END USB1_OTG_HS_Init 1 */
-  // hpcd_USB1_OTG_HS.Instance = USB1_OTG_HS;
-  // hpcd_USB1_OTG_HS.Init.dev_endpoints = 9;
-  // hpcd_USB1_OTG_HS.Init.speed = PCD_SPEED_HIGH;
-  // hpcd_USB1_OTG_HS.Init.dma_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
-  // hpcd_USB1_OTG_HS.Init.Sof_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.low_power_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.lpm_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.vbus_sensing_enable = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.use_dedicated_ep1 = DISABLE;
-  // hpcd_USB1_OTG_HS.Init.use_external_vbus = DISABLE;
-  // if (HAL_PCD_Init(&hpcd_USB1_OTG_HS) != HAL_OK)
-  // {
-  //   HardFault_Handler();
-  // }
 
   board_init2();
 

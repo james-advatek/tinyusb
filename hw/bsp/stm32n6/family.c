@@ -31,13 +31,22 @@
    manufacturer: STMicroelectronics
 */
 
+// Suppress warning caused by mcu driver
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+#endif
+
 #include "stm32n6xx_hal.h"
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #include "bsp/board_api.h"
 
 TU_ATTR_UNUSED static void Error_Handler(void) { }
 
-static void MPU_Config(void);
-static void RISAF_Config(void);
 void HardFault_Handler(void);
 
 typedef struct {
@@ -87,37 +96,6 @@ void USB1_OTG_HS_IRQHandler(void) {
   tusb_int_handler(1, true);
 }
 
-#ifdef TRACE_ETM
-// Not implemented in this port
-void trace_etm_init(void) {
-  return
-}
-#else
-  #define trace_etm_init()
-#endif
-
-#ifdef LOGGER_SWO
-void log_swo_init(void)
-{
-  //UNLOCK FUNNEL
-  *(volatile uint32_t*)(0x5C004FB0) = 0xC5ACCE55; // SWTF_LAR
-  *(volatile uint32_t*)(0x5C003FB0) = 0xC5ACCE55; // SWO_LAR
-
-  //SWO current output divisor register
-  //To change it, you can use the following rule
-  // value = (CPU_Freq / 3 / SWO_Freq) - 1
-  *(volatile uint32_t*)(0x5C003010) = ((SystemCoreClock / 3 / SWO_FREQ) - 1); // SWO_CODR
-
-  //SWO selected pin protocol register
-  *(volatile uint32_t*)(0x5C0030F0) = 0x00000002; // SWO_SPPR
-
-  //Enable ITM input of SWO trace funnel
-  *(volatile uint32_t*)(0x5C004000) |= 0x00000001; // SWFT_CTRL
-}
-#else
-  #define log_swo_init()
-#endif
-
 void board_init(void) {
 
   /* Enable BusFault and SecureFault handlers (HardFault is default) */
@@ -129,14 +107,10 @@ void board_init(void) {
   HAL_PWREx_EnableVddIO4();
   HAL_PWREx_EnableVddIO5();
 
-  MPU_Config();
-
   HAL_Init();
 
   // Implemented in board.h
   SystemClock_Config();
-
-  RISAF_Config();
 
   // Enable All GPIOs clocks
   __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -146,13 +120,13 @@ void board_init(void) {
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPION_CLK_ENABLE();
   __HAL_RCC_GPIOO_CLK_ENABLE();
   __HAL_RCC_GPIOP_CLK_ENABLE();
   __HAL_RCC_GPIOQ_CLK_ENABLE();
 
-  log_swo_init();
-  trace_etm_init();
+  // HAL_ICACHE_Enable();
 
   for (uint8_t i = 0; i < TU_ARRAY_SIZE(board_pindef); i++) {
     HAL_GPIO_Init(board_pindef[i].port, &board_pindef[i].pin_init);
@@ -277,64 +251,6 @@ uint32_t board_millis(void) {
 }
 
 #endif
-
-/* MPU Configuration */
-static void MPU_Config(void)
-{
-  MPU_Region_InitTypeDef default_config = {0};
-  MPU_Attributes_InitTypeDef attr_config = {0};
-  uint32_t primask_bit = __get_PRIMASK();
-  __disable_irq();
-
-  /* disable the MPU */
-  HAL_MPU_Disable();
-
-  /* create an attribute configuration for the MPU */
-  attr_config.Attributes = INNER_OUTER(MPU_NOT_CACHEABLE);
-  attr_config.Number = MPU_ATTRIBUTES_NUMBER0;
-
-  HAL_MPU_ConfigMemoryAttributes(&attr_config);
-
-  /*Normal memory type, code execution allowed */
-  default_config.Enable = MPU_REGION_ENABLE;
-  default_config.Number = MPU_REGION_NUMBER0;
-  default_config.BaseAddress = 0x341FA600;
-  default_config.LimitAddress =  0x341FFFFF;
-  default_config.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
-  default_config.AccessPermission = MPU_REGION_ALL_RW;
-  default_config.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
-  default_config.AttributesIndex = MPU_ATTRIBUTES_NUMBER0;
-  HAL_MPU_ConfigRegion(&default_config);
-
-  /* enable the MPU */
-  HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
-
-  /* Exit critical section to lock the system and avoid any issue around MPU mechanisme */
-  __set_PRIMASK(primask_bit);
-}
-
-
-/**
-* @brief  RISAF Configuration.
-* @retval None
-*/
-static void RISAF_Config(void)
-{
-  RIMC_MasterConfig_t RIMC_master = {0};
-
-  __HAL_RCC_RIFSC_CLK_ENABLE();
-
-  RIMC_master.MasterCID = RIF_CID_1;
-  RIMC_master.SecPriv = RIF_ATTRIBUTE_SEC | RIF_ATTRIBUTE_PRIV;
-
-  HAL_RIF_RIMC_ConfigMasterAttributes(RIF_MASTER_INDEX_OTG1, &RIMC_master);
-  HAL_RIF_RIMC_ConfigMasterAttributes(RIF_MASTER_INDEX_OTG2, &RIMC_master);
-  HAL_RIF_RISC_SetSlaveSecureAttributes(RIF_RISC_PERIPH_INDEX_OTG1HS, RIF_ATTRIBUTE_SEC | RIF_ATTRIBUTE_PRIV);
-  HAL_RIF_RISC_SetSlaveSecureAttributes(RIF_RISC_PERIPH_INDEX_OTG2HS, RIF_ATTRIBUTE_SEC | RIF_ATTRIBUTE_PRIV);
-
-  HAL_RIF_RISC_SetSlaveSecureAttributes(RIF_RISC_PERIPH_INDEX_ADC12, RIF_ATTRIBUTE_SEC | RIF_ATTRIBUTE_PRIV);
-
-}
 
 /**
   * Initializes the Global MSP.
